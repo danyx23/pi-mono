@@ -24,7 +24,13 @@ export { antigravityOAuthProvider, loginAntigravity, refreshAntigravityToken } f
 // Google Gemini CLI
 export { geminiCliOAuthProvider, loginGeminiCli, refreshGoogleCloudToken } from "./google-gemini-cli.js";
 // OpenAI Codex (ChatGPT OAuth)
-export { loginOpenAICodex, openaiCodexOAuthProvider, refreshOpenAICodexToken } from "./openai-codex.js";
+export {
+	loginOpenAICodex,
+	loginOpenAICodexDeviceCode,
+	openaiCodexDeviceCodeOAuthProvider,
+	openaiCodexOAuthProvider,
+	refreshOpenAICodexToken,
+} from "./openai-codex.js";
 
 export * from "./types.js";
 
@@ -36,7 +42,7 @@ import { anthropicOAuthProvider } from "./anthropic.js";
 import { githubCopilotOAuthProvider } from "./github-copilot.js";
 import { antigravityOAuthProvider } from "./google-antigravity.js";
 import { geminiCliOAuthProvider } from "./google-gemini-cli.js";
-import { openaiCodexOAuthProvider } from "./openai-codex.js";
+import { openaiCodexDeviceCodeOAuthProvider, openaiCodexOAuthProvider } from "./openai-codex.js";
 import type { OAuthCredentials, OAuthProviderId, OAuthProviderInfo, OAuthProviderInterface } from "./types.js";
 
 const BUILT_IN_OAUTH_PROVIDERS: OAuthProviderInterface[] = [
@@ -45,6 +51,7 @@ const BUILT_IN_OAUTH_PROVIDERS: OAuthProviderInterface[] = [
 	geminiCliOAuthProvider,
 	antigravityOAuthProvider,
 	openaiCodexOAuthProvider,
+	openaiCodexDeviceCodeOAuthProvider,
 ];
 
 const oauthProviderRegistry = new Map<string, OAuthProviderInterface>(
@@ -56,6 +63,14 @@ const oauthProviderRegistry = new Map<string, OAuthProviderInterface>(
  */
 export function getOAuthProvider(id: OAuthProviderId): OAuthProviderInterface | undefined {
 	return oauthProviderRegistry.get(id);
+}
+
+/**
+ * Resolve the credential storage ID for a provider.
+ * Alias providers can share stored credentials with a canonical provider ID.
+ */
+export function getOAuthCredentialStorageId(id: OAuthProviderId): OAuthProviderId {
+	return getOAuthProvider(id)?.credentialsProviderId ?? id;
 }
 
 /**
@@ -143,7 +158,8 @@ export async function getOAuthApiKey(
 		throw new Error(`Unknown OAuth provider: ${providerId}`);
 	}
 
-	let creds = credentials[providerId];
+	const credentialsProviderId = getOAuthCredentialStorageId(providerId);
+	let creds = credentials[credentialsProviderId];
 	if (!creds) {
 		return null;
 	}

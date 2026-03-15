@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added an OpenAI Codex login-method chooser under `/login`, with the standard browser-based flow as the default and a device-code option for remote flows.
+
 ## [0.58.1] - 2026-03-14
 
 ### Added

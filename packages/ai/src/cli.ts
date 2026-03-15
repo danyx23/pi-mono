@@ -2,7 +2,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { createInterface } from "readline";
-import { getOAuthProvider, getOAuthProviders } from "./utils/oauth/index.js";
+import { getOAuthCredentialStorageId, getOAuthProvider, getOAuthProviders } from "./utils/oauth/index.js";
 import type { OAuthCredentials, OAuthProviderId } from "./utils/oauth/types.js";
 
 const AUTH_FILE = "auth.json";
@@ -49,7 +49,7 @@ async function login(providerId: OAuthProviderId): Promise<void> {
 		});
 
 		const auth = loadAuth();
-		auth[providerId] = { type: "oauth", ...credentials };
+		auth[getOAuthCredentialStorageId(providerId)] = { type: "oauth", ...credentials };
 		saveAuth(auth);
 
 		console.log(`\nCredentials saved to ${AUTH_FILE}`);

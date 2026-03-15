@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Added an alternate OpenAI Codex OAuth device-code login method for remote flows alongside the standard browser-based callback flow.
+
 ## [0.58.1] - 2026-03-14
 
 ### Fixed
