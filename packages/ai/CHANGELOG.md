@@ -5,6 +5,7 @@
 ### Added
 
 - Added Together AI as a built-in OpenAI-compatible provider with generated model metadata and `TOGETHER_API_KEY` authentication ([#3624](https://github.com/earendil-works/pi-mono/pull/3624) by [@Nutlope](https://github.com/Nutlope)).
+- Added an alternate OpenAI Codex OAuth device-code login method for remote flows alongside the standard browser-based callback flow.
 
 ### Fixed
 

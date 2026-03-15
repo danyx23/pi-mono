@@ -5,6 +5,7 @@
 ### Added
 
 - Added Together AI to built-in provider setup, `/login` API-key auth, and default model resolution ([#3624](https://github.com/earendil-works/pi-mono/pull/3624) by [@Nutlope](https://github.com/Nutlope)).
+- Added an OpenAI Codex login-method chooser under `/login`, with the standard browser-based flow as the default and a device-code option for remote flows.
 
 ### Fixed
 
