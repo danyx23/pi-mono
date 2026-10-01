@@ -245,7 +245,7 @@ export class ToolMessage extends LitElement {
 		const toolName = this.tool?.name || this.toolCall.name;
 
 		// Render tool content (renderer handles errors and styling)
-		const result: ToolResultMessageType<any> | undefined = this.aborted
+		const result: ToolResultMessageType | undefined = this.aborted
 			? {
 					role: "toolResult",
 					isError: true,
@@ -343,7 +343,7 @@ export function isArtifactMessage(msg: AgentMessage): msg is ArtifactMessage {
  * Handles:
  * - UserMessageWithAttachments: converts to user message with content blocks
  * - ArtifactMessage: filtered out (UI-only, for session reconstruction)
- * - Standard LLM messages (user, assistant, toolResult): passed through
+ * - Standard LLM messages (system, user, assistant, toolResult): passed through
  */
 export function defaultConvertToLlm(messages: AgentMessage[]): Message[] {
 	return messages
@@ -372,7 +372,7 @@ export function defaultConvertToLlm(messages: AgentMessage[]): Message[] {
 			}
 
 			// Pass through standard LLM roles
-			if (m.role === "user" || m.role === "assistant" || m.role === "toolResult") {
+			if (m.role === "system" || m.role === "user" || m.role === "assistant" || m.role === "toolResult") {
 				return m as Message;
 			}
 

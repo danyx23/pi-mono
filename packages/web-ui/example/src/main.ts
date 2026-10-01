@@ -1,6 +1,7 @@
 import "@mariozechner/mini-lit/dist/ThemeToggle.js";
 import { Agent, type AgentMessage } from "@earendil-works/pi-agent-core";
-import { getModel, type TextContent } from "@earendil-works/pi-ai";
+import type { TextContent } from "@earendil-works/pi-ai";
+import { getModel, streamSimple } from "@earendil-works/pi-ai/compat";
 import {
 	type AgentState,
 	ApiKeyPromptDialog,
@@ -25,7 +26,7 @@ import "./app.css";
 import { icon } from "@mariozechner/mini-lit";
 import { Button } from "@mariozechner/mini-lit/dist/Button.js";
 import { Input } from "@mariozechner/mini-lit/dist/Input.js";
-import { createSystemNotification, customConvertToLlm, registerCustomMessageRenderers } from "./custom-messages.js";
+import { createSystemNotification, customConvertToLlm, registerCustomMessageRenderers } from "./custom-messages.ts";
 
 // Register custom message renderers
 registerCustomMessageRenderers();
@@ -161,6 +162,7 @@ const createAgent = async (initialState?: Partial<AgentState>) => {
 	}
 
 	agent = new Agent({
+		streamFn: streamSimple,
 		initialState: initialState || {
 			systemPrompt: `You are a helpful AI assistant with access to various tools.
 
@@ -178,9 +180,9 @@ Feel free to use these tools when needed to provide accurate and helpful respons
 		convertToLlm: customConvertToLlm,
 	});
 
-	agentUnsubscribe = agent.subscribe((event: any) => {
-		if (event.type === "state-update") {
-			const messages = event.state.messages;
+	agentUnsubscribe = agent.subscribe((event) => {
+		if (event.type === "agent_end") {
+			const messages = agent.state.messages;
 
 			// Generate title after first successful response
 			if (!currentTitle && shouldSaveSession(messages)) {
