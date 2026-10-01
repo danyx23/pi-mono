@@ -11,8 +11,13 @@ export const toolRenderers = new Map<string, ToolRenderer>();
 /**
  * Register a custom tool renderer
  */
-export function registerToolRenderer(toolName: string, renderer: ToolRenderer): void {
-	toolRenderers.set(toolName, renderer);
+export function registerToolRenderer<TParams, TDetails>(
+	toolName: string,
+	renderer: ToolRenderer<TParams, TDetails>,
+): void {
+	// The heterogeneous registry erases detail types. The caller routes each
+	// result to its matching renderer by tool name.
+	toolRenderers.set(toolName, renderer as unknown as ToolRenderer);
 }
 
 /**
