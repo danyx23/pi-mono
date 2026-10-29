@@ -60,6 +60,8 @@ export class ModelSelector extends DialogBase {
 
 	private onSelectCallback?: (model: Model<any>) => void;
 	private allowedProviders?: Set<string>;
+	/** when a model was last used (ms), for listing recently used models first */
+	private lastUsed?: (provider: string, id: string) => number | undefined;
 	private scrollContainerRef = createRef<HTMLDivElement>();
 	private searchInputRef = createRef<HTMLInputElement>();
 	private lastMousePosition = { x: 0, y: 0 };
@@ -70,12 +72,16 @@ export class ModelSelector extends DialogBase {
 		currentModel: Model<any> | null,
 		onSelect: (model: Model<any>) => void,
 		allowedProviders?: string[],
+		lastUsed?: (provider: string, id: string) => number | undefined,
 	) {
 		const selector = new ModelSelector();
 		selector.currentModel = currentModel;
 		selector.onSelectCallback = onSelect;
 		if (allowedProviders) {
 			selector.allowedProviders = new Set(allowedProviders);
+		}
+		if (lastUsed) {
+			selector.lastUsed = lastUsed;
 		}
 		selector.open();
 		selector.loadCustomProviders();
@@ -250,15 +256,18 @@ export class ModelSelector extends DialogBase {
 			filteredModels = filteredModels.filter(({ model }) => model.input.includes("image"));
 		}
 
-		// Sort: when not searching, current model first then by provider.
-		// When searching, preserve the score-based order from above,
-		// but still float the current model to the top.
+		// Sort: when not searching, current model first, then recently used
+		// models (most recent first), then the rest by provider.
+		// When searching, preserve the score-based order from above.
 		if (!this.searchQuery) {
+			const usedAt = (entry: { provider: string; id: string }) => this.lastUsed?.(entry.provider, entry.id) ?? 0;
 			filteredModels.sort((a, b) => {
 				const aIsCurrent = modelsAreEqual(this.currentModel, a.model);
 				const bIsCurrent = modelsAreEqual(this.currentModel, b.model);
 				if (aIsCurrent && !bIsCurrent) return -1;
 				if (!aIsCurrent && bIsCurrent) return 1;
+				const recency = usedAt(b) - usedAt(a);
+				if (recency !== 0) return recency;
 				return a.provider.localeCompare(b.provider);
 			});
 		}
