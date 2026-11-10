@@ -62,6 +62,8 @@ export class ModelSelector extends DialogBase {
 	private allowedProviders?: Set<string>;
 	/** when a model was last used (ms), for listing recently used models first */
 	private lastUsed?: (provider: string, id: string) => number | undefined;
+	/** extra per-model filter on top of allowedProviders (true = listed) */
+	private modelFilter?: (provider: string, id: string) => boolean;
 	private scrollContainerRef = createRef<HTMLDivElement>();
 	private searchInputRef = createRef<HTMLInputElement>();
 	private lastMousePosition = { x: 0, y: 0 };
@@ -73,6 +75,7 @@ export class ModelSelector extends DialogBase {
 		onSelect: (model: Model<any>) => void,
 		allowedProviders?: string[],
 		lastUsed?: (provider: string, id: string) => number | undefined,
+		modelFilter?: (provider: string, id: string) => boolean,
 	) {
 		const selector = new ModelSelector();
 		selector.currentModel = currentModel;
@@ -82,6 +85,9 @@ export class ModelSelector extends DialogBase {
 		}
 		if (lastUsed) {
 			selector.lastUsed = lastUsed;
+		}
+		if (modelFilter) {
+			selector.modelFilter = modelFilter;
 		}
 		selector.open();
 		selector.loadCustomProviders();
@@ -226,6 +232,10 @@ export class ModelSelector extends DialogBase {
 		if (this.allowedProviders) {
 			const allowed = this.allowedProviders;
 			allModels.splice(0, allModels.length, ...allModels.filter(({ provider }) => allowed.has(provider)));
+		}
+		if (this.modelFilter) {
+			const keep = this.modelFilter;
+			allModels.splice(0, allModels.length, ...allModels.filter(({ provider, id }) => keep(provider, id)));
 		}
 
 		// Filter models based on search and capability filters
