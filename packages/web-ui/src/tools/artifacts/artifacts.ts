@@ -38,11 +38,16 @@ export interface Artifact {
 	updatedAt: Date;
 }
 
+type ArtifactsCommand = "create" | "update" | "rewrite" | "get" | "delete" | "logs";
+
 // JSON-schema friendly parameters object (LLM-facing)
 const artifactsParamsSchema = Type.Object({
-	command: StringEnum(["create", "update", "rewrite", "get", "delete", "logs"], {
-		description: "The operation to perform",
-	}),
+	// pi-ai 1.x StringEnum returns a pi-schema Schema, which TypeBox's Static cannot see through.
+	command: Type.Unsafe<ArtifactsCommand>(
+		StringEnum(["create", "update", "rewrite", "get", "delete", "logs"] as const, {
+			description: "The operation to perform",
+		}),
+	),
 	filename: Type.String({ description: "Filename including extension (e.g., 'index.html', 'script.js')" }),
 	content: Type.Optional(Type.String({ description: "File content" })),
 	old_str: Type.Optional(Type.String({ description: "String to replace (for update command)" })),
